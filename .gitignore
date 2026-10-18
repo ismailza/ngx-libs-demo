@@ -1,0 +1,20 @@
+.env
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# server
+**/bin/
+**/obj/
+*.user
+TestResults/
+
+# client
+client/node_modules/
+client/dist/
+client/.angular/
+
+# claude code (personal)
+.claude/settings.local.json
+CLAUDE.local.md
