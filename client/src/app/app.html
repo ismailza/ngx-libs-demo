@@ -1,0 +1,22 @@
+<a class="skip-link" href="#main">Skip to content</a>
+@if (loading.loading()) {
+  <div class="progress" role="progressbar" aria-label="Loading"></div>
+}
+
+<app-header />
+
+@if (auth.initError()) {
+  <p class="banner error app-banner" role="alert">
+    The auth server could not be reached, so your session was not restored. Check that the API is
+    running.
+  </p>
+}
+
+<div class="layout">
+  <main id="main" tabindex="-1">
+    <router-outlet />
+  </main>
+  <app-session-panel />
+</div>
+
+<app-toasts />

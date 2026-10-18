@@ -1,0 +1,29 @@
+<h1>Profile</h1>
+@if (!auth.canLoadProfile()) {
+  <p class="muted">This auth adapter does not provide a profile.</p>
+} @else {
+  @if (error()) {
+    <p class="banner error" role="alert">{{ error() }}</p>
+  }
+  @if (auth.profile(); as profile) {
+    <dl class="card">
+      <dt>Id</dt>
+      <dd>
+        <code>{{ profile.id }}</code>
+      </dd>
+      <dt>Username</dt>
+      <dd>{{ profile.username }}</dd>
+      <dt>Name</dt>
+      <dd>{{ profile.firstName }} {{ profile.lastName }}</dd>
+      <dt>Email</dt>
+      <dd>{{ profile.email }} {{ profile.emailVerified ? '(verified)' : '(not verified)' }}</dd>
+      @if (memberSince(); as since) {
+        <dt>Member since</dt>
+        <dd>{{ since | date: 'mediumDate' }}</dd>
+      }
+    </dl>
+  } @else if (!error()) {
+    <p role="status">Loading…</p>
+  }
+  <button type="button" class="secondary" (click)="load()">Reload profile</button>
+}

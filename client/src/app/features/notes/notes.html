@@ -1,0 +1,51 @@
+<h1>My notes</h1>
+
+<form [formRoot]="noteForm" class="add">
+  <label for="note" class="visually-hidden">New note</label>
+  <input
+    id="note"
+    placeholder="Write a note…"
+    [formField]="noteForm.text"
+    [attr.aria-invalid]="serverErrors().length > 0"
+    [attr.aria-describedby]="serverErrors().length ? 'note-errors' : null"
+  />
+  <button type="submit" [disabled]="noteForm().submitting() || noteForm().invalid()">Add</button>
+</form>
+@if (serverErrors().length) {
+  <ul id="note-errors" class="field-error">
+    @for (error of serverErrors(); track $index) {
+      <li>{{ error.message }}</li>
+    }
+  </ul>
+}
+
+<!-- Only the first load: defaultValue makes hasValue() true from the start, and a reload keeps the list. -->
+@if (notes.status() === 'loading') {
+  <p role="status">Loading…</p>
+} @else if (notes.error()) {
+  <p class="banner error" role="alert">
+    Could not load notes.
+    <button type="button" class="link" (click)="notes.reload()">Try again</button>
+  </p>
+} @else {
+  <ul class="list">
+    @for (note of notes.value(); track note.id) {
+      <li>
+        <span class="text">{{ note.text }}</span>
+        <time class="muted" [attr.datetime]="note.createdAt">{{
+          note.createdAt | date: 'short'
+        }}</time>
+        <button
+          type="button"
+          class="secondary small"
+          (click)="remove(note)"
+          [attr.aria-label]="'Delete note: ' + note.text"
+        >
+          Delete
+        </button>
+      </li>
+    } @empty {
+      <li class="muted">No notes yet.</li>
+    }
+  </ul>
+}

@@ -1,0 +1,37 @@
+<div class="toasts" role="region" aria-label="Notifications">
+  <div class="stack" aria-live="polite">
+    @for (toast of successes(); track toast.id) {
+      <div class="toast success">
+        <p>{{ toast.message }}</p>
+        <button
+          type="button"
+          class="link"
+          (click)="notifications.dismiss(toast.id)"
+          aria-label="Dismiss notification"
+        >
+          ✕
+        </button>
+      </div>
+    }
+  </div>
+  <div class="stack" aria-live="assertive">
+    @for (toast of errors(); track toast.id) {
+      <div class="toast error">
+        <p>
+          {{ toast.message }}
+          @if (toast.detail) {
+            <small>{{ toast.detail }}</small>
+          }
+        </p>
+        <button
+          type="button"
+          class="link"
+          (click)="notifications.dismiss(toast.id)"
+          aria-label="Dismiss notification"
+        >
+          ✕
+        </button>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,41 @@
+<h1>API playground</h1>
+<p class="muted">
+  Each button calls the API through <code>ApiService</code>. Open DevTools → Network to see the
+  attempts, the <code>Authorization</code> header on each, and the version in the URL.
+</p>
+
+@for (group of groups; track group.title; let i = $index) {
+  <section class="card group" [attr.aria-labelledby]="'group-' + i">
+    <h2 [id]="'group-' + i">{{ group.title }}</h2>
+    <p class="muted">{{ group.intro }}</p>
+    <ul class="scenarios">
+      @for (scenario of group.scenarios; track scenario.id) {
+        <li>
+          <button
+            type="button"
+            class="secondary"
+            (click)="run(scenario)"
+            [disabled]="running() === scenario.id"
+          >
+            {{ scenario.label }}
+          </button>
+          <span class="muted">{{ scenario.expect }}</span>
+        </li>
+      }
+    </ul>
+  </section>
+}
+
+<section class="card" aria-live="polite" aria-labelledby="result-title">
+  <h2 id="result-title">Result</h2>
+  @if (outcome(); as result) {
+    <p>
+      <strong>{{ result.scenario }}</strong> —
+      <span [class]="result.ok ? 'ok' : 'failed'">{{ result.ok ? 'succeeded' : 'failed' }}</span>
+      after {{ result.elapsedMs }} ms
+    </p>
+    <pre>{{ result.body | json }}</pre>
+  } @else {
+    <p class="muted">Run a scenario.</p>
+  }
+</section>

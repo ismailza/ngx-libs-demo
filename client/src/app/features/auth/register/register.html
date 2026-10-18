@@ -1,0 +1,74 @@
+<section class="card narrow">
+  <h1>Create an account</h1>
+  <form [formRoot]="registerForm">
+    <div class="row">
+      <div class="field">
+        <label for="firstName">First name</label>
+        <input
+          id="firstName"
+          autocomplete="given-name"
+          [formField]="registerForm.firstName"
+          [attr.aria-invalid]="showErrors('firstName')"
+          [attr.aria-describedby]="showErrors('firstName') ? 'firstName-errors' : null"
+        />
+        @if (showErrors('firstName')) {
+          <ul id="firstName-errors" class="field-error">
+            @for (error of registerForm.firstName().errors(); track $index) {
+              <li>{{ error.message }}</li>
+            }
+          </ul>
+        }
+      </div>
+      <div class="field">
+        <label for="lastName">Last name</label>
+        <input
+          id="lastName"
+          autocomplete="family-name"
+          [formField]="registerForm.lastName"
+          [attr.aria-invalid]="showErrors('lastName')"
+          [attr.aria-describedby]="showErrors('lastName') ? 'lastName-errors' : null"
+        />
+        @if (showErrors('lastName')) {
+          <ul id="lastName-errors" class="field-error">
+            @for (error of registerForm.lastName().errors(); track $index) {
+              <li>{{ error.message }}</li>
+            }
+          </ul>
+        }
+      </div>
+    </div>
+
+    @for (field of fields; track field.id) {
+      <label [for]="field.id">{{ field.label }}</label>
+      <input
+        [id]="field.id"
+        [type]="field.type"
+        [attr.autocomplete]="field.autocomplete"
+        [formField]="registerForm[field.id]"
+        [attr.aria-invalid]="showErrors(field.id)"
+        [attr.aria-describedby]="showErrors(field.id) ? field.id + '-errors' : null"
+      />
+      @if (showErrors(field.id)) {
+        <ul [id]="field.id + '-errors'" class="field-error">
+          @for (error of registerForm[field.id]().errors(); track $index) {
+            <li>{{ error.message }}</li>
+          }
+        </ul>
+      }
+    }
+    <p class="muted">At least 8 characters, with upper and lower case, a digit and a symbol.</p>
+
+    @if (registerForm().errors().length) {
+      <ul class="banner error" role="alert">
+        @for (error of registerForm().errors(); track $index) {
+          <li>{{ error.message }}</li>
+        }
+      </ul>
+    }
+
+    <button type="submit" [disabled]="registerForm().submitting()">
+      {{ registerForm().submitting() ? 'Creating…' : 'Create account' }}
+    </button>
+  </form>
+  <p>Already registered? <a routerLink="/login">Sign in</a>.</p>
+</section>

@@ -1,0 +1,73 @@
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+}
+
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+  z-index: 10;
+  padding: 0.5rem 1rem;
+  background: var(--surface);
+}
+
+/* ApiLoadingService.loading() */
+.progress {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 20;
+  height: 3px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+.progress::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: var(--accent);
+  animation: progress 1.1s ease-in-out infinite;
+}
+
+@keyframes progress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress::after {
+    width: 100%;
+    animation: none;
+  }
+}
+
+.app-banner {
+  max-width: 72rem;
+  margin: 1rem auto 0;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 22rem;
+  gap: 1.5rem;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+@media (max-width: 52rem) {
+  .layout {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+}
+
+main:focus {
+  outline: none;
+}
