@@ -1,0 +1,38 @@
+<aside class="card" aria-labelledby="session-title">
+  <h2 id="session-title">Session</h2>
+  <dl>
+    <dt>Provider</dt>
+    <dd>{{ provider }}</dd>
+    <dt>Ready</dt>
+    <dd>{{ auth.ready() ? 'yes' : 'no' }}</dd>
+    <dt>Authenticated</dt>
+    <dd>{{ auth.authenticated() ? 'yes' : 'no' }}</dd>
+    @if (auth.authenticated()) {
+      <dt>Roles</dt>
+      <dd>{{ auth.roles().join(', ') || '—' }}</dd>
+      <dt>Token expires in</dt>
+      <dd>{{ expiresIn() }}</dd>
+      <dt>Token issued</dt>
+      <dd>{{ issuedAgo() }} ago</dd>
+      <dt>Token id</dt>
+      <dd>
+        <code>{{ tokenId() }}</code> <span class="muted">(changes on every refresh)</span>
+      </dd>
+    }
+  </dl>
+
+  @if (auth.claims(); as claims) {
+    <details>
+      <summary>Access-token claims</summary>
+      <pre>{{ claims | json }}</pre>
+    </details>
+  }
+
+  @if (provider === 'local') {
+    <p class="hint">
+      The access token lives in memory only. The refresh token is an <code>HttpOnly</code> cookie
+      scoped to <code>/api/auth</code>: DevTools → Application → Cookies shows it, but scripts on
+      this page can't read it.
+    </p>
+  }
+</aside>

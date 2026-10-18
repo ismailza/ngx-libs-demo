@@ -1,0 +1,48 @@
+name: ngx-libs-demo
+
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: demo
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-demo}
+    ports:
+      # 5433 on the host, to stay clear of any local Postgres on 5432.
+      - "5433:5432"
+    volumes:
+      # Postgres 18 images keep their data under /var/lib/postgresql/<major>.
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U demo -d demo"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  server:
+    build: ./server
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Default: Host=db;Port=5432;Database=demo;Username=demo;Password=${POSTGRES_PASSWORD:-demo};Gss Encryption Mode=Disable
+      # Local | Keycloak (not implemented yet) — see docs/auth-providers.md
+      Auth__Provider: ${AUTH_PROVIDER:-Local}
+      Auth__Local__Jwt__SigningKey: ${JWT_SIGNING_KEY:?Set JWT_SIGNING_KEY in .env (at least 32 characters)}
+      Auth__Local__Jwt__AccessTokenMinutes: ${ACCESS_TOKEN_MINUTES:-5}
+      # The stack serves plain HTTP on :8080. Set to true when it sits behind HTTPS.
+      Auth__Local__RefreshToken__Secure: ${REFRESH_COOKIE_SECURE:-false}
+      # Off unless .env turns it on: creates alice and admin with a known password.
+      Seed__Enabled: ${SEED_DEMO_USERS:-false}
+      Seed__Password: ${SEED_PASSWORD:-Passw0rd!}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  client:
+    build: ./client
+    ports:
+      - "8080:80"
+    depends_on:
+      - server
+
+volumes:
+  db-data:

@@ -1,0 +1,52 @@
+<section class="card narrow">
+  <h1>Sign in</h1>
+  @if (returnUrl()) {
+    <p class="muted">
+      Sign in to continue to <code>{{ target() }}</code
+      >.
+    </p>
+  }
+
+  <form [formRoot]="loginForm">
+    <label for="username">Username or email</label>
+    <input
+      id="username"
+      autocomplete="username"
+      [formField]="loginForm.username"
+      [attr.aria-invalid]="showError(loginForm.username)"
+      [attr.aria-describedby]="showError(loginForm.username) ? 'username-error' : null"
+    />
+    @if (showError(loginForm.username)) {
+      <p id="username-error" class="field-error">Enter your username or email.</p>
+    }
+
+    <label for="password">Password</label>
+    <input
+      id="password"
+      type="password"
+      autocomplete="current-password"
+      [formField]="loginForm.password"
+      [attr.aria-invalid]="showError(loginForm.password)"
+      [attr.aria-describedby]="showError(loginForm.password) ? 'password-error' : null"
+    />
+    @if (showError(loginForm.password)) {
+      <p id="password-error" class="field-error">Enter your password.</p>
+    }
+
+    @if (error()) {
+      <p class="banner error" role="alert">{{ error() }}</p>
+    }
+
+    <button type="submit" [disabled]="loginForm().submitting()">
+      {{ loginForm().submitting() ? 'Signing in…' : 'Sign in' }}
+    </button>
+  </form>
+
+  <p class="muted">
+    Demo accounts:
+    <button type="button" class="link" (click)="fill('alice')">alice</button> ·
+    <button type="button" class="link" (click)="fill('admin')">admin</button> — password
+    <code>Passw0rd!</code>
+  </p>
+  <p>No account? <a routerLink="/register">Create one</a>.</p>
+</section>

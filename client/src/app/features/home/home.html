@@ -1,0 +1,61 @@
+<h1>Two libraries, one ASP.NET Core backend</h1>
+<ul>
+  <li>
+    <strong><code>&#64;ismailza/ngx-auth-client</code></strong> owns the session. Pages only use
+    <code>AuthService</code>, <code>authGuard</code> and <code>authTokenInterceptor</code>; the
+    adapter is chosen from the server's configuration (currently <strong>{{ provider }}</strong
+    >).
+  </li>
+  <li>
+    <strong><code>&#64;ismailza/ngx-api-client</code></strong> owns every other call: versioned URLs
+    (<code>/api/v1/…</code>), retry with backoff, <code>problem+json</code> errors normalised into
+    <code>ApiError</code>, success toasts and the loading bar.
+  </li>
+</ul>
+<p>
+  They meet in the interceptor chain — the bearer token is added innermost, so every retry is signed
+  — and in
+  <code>ApiErrorHandler</code>, which sends a 401 back to sign-in.
+</p>
+
+<h2>Try it</h2>
+<ol class="steps">
+  <li>
+    Open <a routerLink="/notes">Notes</a> while signed out: <code>authGuard</code> sends you to sign
+    in, then back.
+  </li>
+  @if (provider === 'local') {
+    <li>
+      Sign in as <strong>alice</strong> or <strong>admin</strong> (password <code>Passw0rd!</code>).
+    </li>
+  }
+  <li>Reload the page: the session is restored.</li>
+  <li>Watch the session panel: the token is replaced shortly before it expires.</li>
+  <li>
+    Open the <a routerLink="/playground">Playground</a> to trigger retries, errors, slow calls and
+    API versions.
+  </li>
+  @if (provider === 'local') {
+    <li>
+      As alice, open <code>/admin</code>: you land on <a routerLink="/forbidden">Forbidden</a>.
+    </li>
+    <li>
+      As admin, revoke alice's sessions on the <a routerLink="/admin">Admin</a> page while she is
+      signed in elsewhere: she is signed out at her next refresh.
+    </li>
+  }
+</ol>
+
+<h2>Adapter capabilities</h2>
+<ul class="steps">
+  <li>
+    signIn():
+    {{ auth.canSignIn() ? 'supported — in-app login form' : 'not supported — redirect sign-in' }}
+  </li>
+  <li>loadProfile(): {{ auth.canLoadProfile() ? 'supported' : 'not supported' }}</li>
+  <li>
+    register():
+    {{ auth.canRegister() ? 'supported' : 'not supported — this app has its own sign-up page' }}
+  </li>
+  <li>accountManagement(): {{ auth.canManageAccount() ? 'supported' : 'not supported' }}</li>
+</ul>

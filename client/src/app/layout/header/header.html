@@ -1,0 +1,48 @@
+<header class="topbar">
+  <a class="brand" routerLink="/">ngx-libs <span>demo</span></a>
+
+  <nav aria-label="Main">
+    <a
+      routerLink="/"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      ariaCurrentWhenActive="page"
+      >Home</a
+    >
+    <a routerLink="/notes" routerLinkActive="active" ariaCurrentWhenActive="page">Notes</a>
+    <a routerLink="/playground" routerLinkActive="active" ariaCurrentWhenActive="page"
+      >Playground</a
+    >
+    <a routerLink="/profile" routerLinkActive="active" ariaCurrentWhenActive="page">Profile</a>
+    @if (isAdmin()) {
+      <a routerLink="/admin" routerLinkActive="active" ariaCurrentWhenActive="page">Admin</a>
+    }
+  </nav>
+
+  <div class="account">
+    @if (!auth.ready()) {
+      <span class="muted" role="status">Restoring session…</span>
+    } @else if (auth.authenticated()) {
+      <span
+        >Signed in as <strong>{{ username() }}</strong></span
+      >
+      <button type="button" class="secondary" (click)="logout()" [disabled]="loggingOut()">
+        Sign out
+      </button>
+    } @else {
+      <button type="button" (click)="login()">Sign in</button>
+      @switch (signUp()) {
+        @case ('adapter') {
+          <button type="button" class="secondary" (click)="register()">Create account</button>
+        }
+        @case ('form') {
+          <a routerLink="/register" class="button secondary">Create account</a>
+        }
+      }
+    }
+  </div>
+</header>
+
+@if (logoutError() && !auth.authenticated()) {
+  <p class="banner error logout-error" role="alert">{{ logoutError() }}</p>
+}

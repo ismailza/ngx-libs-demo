@@ -1,0 +1,22 @@
+:host {
+  align-self: start;
+  position: sticky;
+  top: 1rem;
+}
+
+h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 1rem;
+  margin: 0 0 1rem;
+}
+
+.hint {
+  font-size: 0.85rem;
+  color: var(--muted);
+}

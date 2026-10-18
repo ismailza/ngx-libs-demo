@@ -1,0 +1,10 @@
+root = false
+
+[*.cs]
+dotnet_diagnostic.CA1515.severity = none # minimal-API types are public on purpose (tests, OpenAPI)
+dotnet_diagnostic.CA1062.severity = none # nullable reference types already cover this
+
+# EF Core migrations are generated code.
+[src/Demo.Api/Data/Migrations/*.cs]
+generated_code = true
+dotnet_analyzer_diagnostic.severity = none

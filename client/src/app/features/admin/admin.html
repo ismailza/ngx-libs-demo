@@ -1,0 +1,75 @@
+<h1>Admin</h1>
+<p class="muted">
+  Revoking sessions deletes a user's refresh tokens. Their open tabs keep working until the access
+  token expires, then the refresh is refused and they are signed out.
+</p>
+
+@if (users.error()) {
+  <p class="banner error" role="alert">Could not load users.</p>
+} @else if (users.hasValue()) {
+  @let result = users.value();
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">
+        Users, page
+        {{
+          result.page.number + 1
+        }}
+        of
+        {{
+          result.page.totalPages
+        }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">User</th>
+          <th scope="col">Email</th>
+          <th scope="col">Roles</th>
+          <th scope="col">Active sessions</th>
+          <th scope="col"><span class="visually-hidden">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (user of result.content; track user.id) {
+          <tr>
+            <td>
+              {{ user.username }}
+              @if (isMe(user)) {
+                <span class="muted">(you)</span>
+              }
+            </td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.roles.join(', ') }}</td>
+            <td>{{ user.activeSessions }}</td>
+            <td>
+              <button
+                type="button"
+                class="secondary small"
+                (click)="revoke(user)"
+                [disabled]="user.activeSessions === 0"
+                [attr.aria-label]="'Revoke sessions of ' + user.username"
+              >
+                Revoke sessions
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <nav class="pager" aria-label="Pagination">
+    <button type="button" class="secondary small" (click)="previous()" [disabled]="page() === 0">
+      Previous
+    </button>
+    <span
+      >Page {{ result.page.number + 1 }} of {{ result.page.totalPages }} ·
+      {{ result.page.totalElements }} users</span
+    >
+    <button type="button" class="secondary small" (click)="next()" [disabled]="isLastPage()">
+      Next
+    </button>
+  </nav>
+} @else {
+  <p role="status">Loading…</p>
+}
