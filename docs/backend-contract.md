@@ -7,9 +7,12 @@ What the API promises each library. The integration tests in
 
 | Endpoint | Auth | Response |
 | --- | --- | --- |
-| `GET /api/config` | none | `{ auth: { provider, local?, keycloak? } }`, `Cache-Control: no-store` |
+| `GET /api/config` | none | `{ auth: { provider, local?, keycloak? }, features: { admin, signUpForm } }`, `Cache-Control: no-store` |
 
-See [auth-providers.md](auth-providers.md).
+`features` says which optional endpoints are mapped, so the client routes pages
+by what exists instead of by provider name: `admin` → `/api/v1/admin/*`,
+`signUpForm` → `POST /api/auth/register`. Both are `true` with Local and `false`
+with Keycloak. See [auth-providers.md](auth-providers.md).
 
 ## Auth (Local provider) — for `withHttpAuth()`
 
@@ -80,6 +83,24 @@ The value is 32 random bytes; only its SHA-256 is stored. Each refresh
 Both values can be faked, so the client check narrows the grace window rather
 than closing it.
 
+## Auth (Keycloak provider) — for `withKeycloak()`
+
+With `Auth:Provider=Keycloak` the API issues no tokens: `/api/auth/*` and
+`/api/v1/admin/*` answer `404`. Every protected endpoint accepts a Keycloak access
+token that has:
+
+| Claim | Requirement |
+| --- | --- |
+| `iss` | `{Auth:Keycloak:Url}/realms/{Realm}` |
+| `aud` | contains `demo-api` (`Auth:Keycloak:Audience`) |
+| signature | RS256, a key from the realm's JWKS |
+| `exp` / `nbf` | valid, 30 s skew |
+| `sub` | the user id that data is keyed by |
+| `roles` | realm roles, read by the `admin` policy |
+
+Anything else is `401 UNAUTHENTICATED`. The realm's mappers produce `aud` and
+`roles` — see [auth-providers.md](auth-providers.md#realm-demo).
+
 ## Errors — for ngx-api-client
 
 Every error under `/api` is `application/problem+json` in the shape
@@ -138,7 +159,7 @@ not versioned; the client calls them with `{ version: false }` where needed.
 | `GET/POST /api/v1/notes`, `DELETE /api/v1/notes/{id}` | user | Scoped to the token's `sub` |
 | `GET /api/v1/admin/users` | `admin` role | Paged. Local provider only |
 | `POST /api/v1/admin/users/{id}/revoke-sessions` | `admin` role | Revokes all refresh tokens. Local only |
-| `GET /api/health` | none | Includes a database check |
+| `GET /api/health` | none | Includes a database check, and with Keycloak a check that the realm's discovery document can be fetched (`503` otherwise) |
 
 ### Playground (misbehaving on purpose)
 

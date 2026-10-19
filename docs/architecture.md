@@ -102,7 +102,7 @@ server/
 │   │   ├── AuthSetup.cs         # the provider switch
 │   │   ├── ClientConfigEndpoint.cs   # GET /api/config
 │   │   ├── Local/               # Identity + JWT + rotating refresh cookie
-│   │   └── Keycloak/            # placeholder: options + client config
+│   │   └── Keycloak/            # JWT validation against the realm + client config
 │   ├── Data/                    # DbContext, entities, migrations, seeding
 │   ├── Features/                # Notes, Admin, Playground — one folder each
 │   └── Infrastructure/          # problem+json writer, rate limiting, paging

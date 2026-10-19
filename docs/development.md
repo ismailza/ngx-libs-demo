@@ -14,6 +14,8 @@ dotnet run --project server/src/Demo.Api                  # API on http://localh
 cd client && npm ci && npm start                          # app on http://localhost:4200
 ```
 
+For the Keycloak provider, see [auth-providers.md](auth-providers.md#run-it).
+
 `ng serve` proxies `/api` to `localhost:5080` (`client/proxy.conf.json`), so the
 app and API share an origin, as they do behind nginx. The API applies
 migrations and seeds `alice` and `admin` on startup. Development settings are in
@@ -75,14 +77,17 @@ Server settings come from `appsettings*.json`, overridden by environment variabl
 
 | Setting | `.env` | Default | Notes |
 | --- | --- | --- | --- |
-| `Auth:Provider` | `AUTH_PROVIDER` | `Local` | `Local` or `Keycloak` (not implemented yet) |
+| `Auth:Provider` | `AUTH_PROVIDER` | `Local` | `Local` or `Keycloak` (also set `COMPOSE_PROFILES=keycloak`) |
 | `Auth:Local:Jwt:SigningKey` | `JWT_SIGNING_KEY` | — | Required for Local, ≥ 32 characters |
 | `Auth:Local:Jwt:AccessTokenMinutes` | `ACCESS_TOKEN_MINUTES` | `5` | |
 | `Auth:Local:Jwt:Issuer` / `Audience` | | `ngx-libs-demo` | |
 | `Auth:Local:RefreshToken:Days` | | `7` | Sliding |
 | `Auth:Local:RefreshToken:ReuseGraceSeconds` | | `10` | |
 | `Auth:Local:RefreshToken:Secure` | `REFRESH_COOKIE_SECURE` | `true` (`false` in Docker) | Docker serves plain HTTP; set `true` behind HTTPS |
-| `Auth:Keycloak:Url` / `Realm` / `ClientId` / `Audience` | | — | See [auth-providers.md](auth-providers.md) |
+| Realm redirect URI | `APP_URL` | `http://localhost:8080` | Substituted into `keycloak/demo-realm.json` on first import |
+| `Auth:Keycloak:Url` | `KEYCLOAK_URL` | — (`http://localhost:8180` in Development and Docker) | Public Keycloak URL; see [auth-providers.md](auth-providers.md) |
+| `Auth:Keycloak:InternalUrl` / `Realm` / `ClientId` / `Audience` / `RequireHttpsMetadata` | | `Url` / `demo` / `demo-web` / `demo-api` / `true` | |
+| Keycloak DB and admin console | `KEYCLOAK_DB_PASSWORD`, `KEYCLOAK_ADMIN`, `KEYCLOAK_ADMIN_PASSWORD` | `keycloak`, `kcadmin`, `kcadmin` | Compose `keycloak` profile only |
 | `ConnectionStrings:Default` | `POSTGRES_PASSWORD` | — | |
 | `RateLimiting:AuthPermitsPerMinute` | | `10` | Login and register, per IP |
 | `Database:MigrateOnStartup` | | `true` | |
