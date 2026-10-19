@@ -10,8 +10,8 @@ public enum AuthProvider
     Local,
 
     /// <summary>
-    /// An external Keycloak realm. The client uses <c>withKeycloak()</c>. Not implemented yet —
-    /// see docs/auth-providers.md.
+    /// An external Keycloak realm issues the tokens; this API only validates them. The client
+    /// uses <c>withKeycloak()</c>. See docs/auth-providers.md.
     /// </summary>
     Keycloak,
 }

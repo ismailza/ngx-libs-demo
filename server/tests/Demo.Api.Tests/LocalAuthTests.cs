@@ -19,6 +19,9 @@ public sealed class LocalAuthTests(ApiFactory api)
         Assert.Equal("local", auth.GetProperty("provider").GetString());
         Assert.Equal("/api/auth/login", auth.GetProperty("local").GetProperty("endpoints").GetProperty("signIn").GetString());
         Assert.False(auth.TryGetProperty("keycloak", out _));
+        var features = config.GetProperty("features");
+        Assert.True(features.GetProperty("admin").GetBoolean());
+        Assert.True(features.GetProperty("signUpForm").GetBoolean());
     }
 
     [Fact]
