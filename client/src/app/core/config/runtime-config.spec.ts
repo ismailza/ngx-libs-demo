@@ -14,6 +14,7 @@ const local = {
       },
     },
   },
+  features: { admin: true, signUpForm: true },
 };
 
 const respond =
@@ -32,16 +33,22 @@ describe('runtime config', () => {
         provider: 'keycloak',
         keycloak: { url: 'http://kc', realm: 'demo', clientId: 'web' },
       },
+      features: { admin: false, signUpForm: false },
     });
     expect(config.auth.provider).toBe('keycloak');
+    expect(config.features).toEqual({ admin: false, signUpForm: false });
   });
 
-  it.each([[null], [{}], [{ auth: { provider: 'local' } }], [{ auth: { provider: 'okta' } }]])(
-    'rejects %j',
-    (body) => {
-      expect(() => parseRuntimeConfig(body)).toThrow();
-    },
-  );
+  it.each([
+    [null],
+    [{}],
+    [{ ...local, auth: { provider: 'local' } }],
+    [{ ...local, auth: { provider: 'okta' } }],
+    [{ auth: local.auth }],
+    [{ ...local, features: { admin: 'yes', signUpForm: true } }],
+  ])('rejects %j', (body) => {
+    expect(() => parseRuntimeConfig(body)).toThrow();
+  });
 
   it('loads it from the API', async () => {
     await expect(loadRuntimeConfig(respond(local))).resolves.toEqual(local);

@@ -24,9 +24,13 @@
     Open <a routerLink="/notes">Notes</a> while signed out: <code>authGuard</code> sends you to sign
     in, then back.
   </li>
-  @if (provider === 'local') {
+  <li>
+    Sign in as <strong>alice</strong> or <strong>admin</strong> (password <code>Passw0rd!</code>).
+  </li>
+  @if (provider === 'keycloak') {
     <li>
-      Sign in as <strong>alice</strong> or <strong>admin</strong> (password <code>Passw0rd!</code>).
+      "Create account" opens Keycloak's registration page; new accounts get the
+      <code>user</code> role.
     </li>
   }
   <li>Reload the page: the session is restored.</li>

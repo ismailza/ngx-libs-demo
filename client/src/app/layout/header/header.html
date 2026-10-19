@@ -14,7 +14,7 @@
       >Playground</a
     >
     <a routerLink="/profile" routerLinkActive="active" ariaCurrentWhenActive="page">Profile</a>
-    @if (isAdmin()) {
+    @if (showAdmin()) {
       <a routerLink="/admin" routerLinkActive="active" ariaCurrentWhenActive="page">Admin</a>
     }
   </nav>

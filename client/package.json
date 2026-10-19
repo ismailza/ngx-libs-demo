@@ -23,6 +23,7 @@
     "@angular/router": "^22.2.0",
     "@ismailza/ngx-api-client": "^0.3.0",
     "@ismailza/ngx-auth-client": "^0.2.0",
+    "keycloak-js": "^26.2.4",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

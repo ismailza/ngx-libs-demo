@@ -25,5 +25,16 @@
   } @else if (!error()) {
     <p role="status">Loading…</p>
   }
-  <button type="button" class="secondary" (click)="load()">Reload profile</button>
+  @if (actionError()) {
+    <p class="banner error" role="alert">{{ actionError() }}</p>
+  }
+  <div class="actions">
+    <button type="button" class="secondary" (click)="load()">Reload profile</button>
+    @if (auth.canManageAccount()) {
+      <button type="button" class="secondary" (click)="manageAccount()">Manage account</button>
+    }
+    @if (auth.canUpdatePassword()) {
+      <button type="button" class="secondary" (click)="updatePassword()">Change password</button>
+    }
+  </div>
 }

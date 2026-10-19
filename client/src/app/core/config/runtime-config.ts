@@ -6,6 +6,15 @@ import { InjectionToken } from '@angular/core';
  */
 export interface RuntimeConfig {
   readonly auth: AuthConfig;
+  readonly features: Features;
+}
+
+/** Optional parts of the API, mapped or not depending on the provider. */
+export interface Features {
+  /** `/api/v1/admin/*` → the Admin page. */
+  readonly admin: boolean;
+  /** `POST /api/auth/register` → the app's own sign-up form. */
+  readonly signUpForm: boolean;
 }
 
 export type AuthConfig = LocalAuthConfig | KeycloakAuthConfig;
@@ -24,7 +33,7 @@ export interface LocalAuthConfig {
   };
 }
 
-/** An external Keycloak realm → `withKeycloak()`. Not wired yet. */
+/** An external Keycloak realm → `withKeycloak()`. */
 export interface KeycloakAuthConfig {
   readonly provider: 'keycloak';
   readonly keycloak: {
@@ -56,14 +65,26 @@ export async function loadRuntimeConfig(fetchFn: typeof fetch = fetch): Promise<
 export function parseRuntimeConfig(body: unknown): RuntimeConfig {
   const auth = isRecord(body) && isRecord(body['auth']) ? body['auth'] : null;
   const provider = auth?.['provider'];
+  const features = parseFeatures(isRecord(body) ? body['features'] : undefined);
 
   if (provider === 'local' && isRecord(auth?.['local']) && isRecord(auth['local']['endpoints'])) {
-    return { auth: auth as unknown as LocalAuthConfig };
+    return { auth: auth as unknown as LocalAuthConfig, features };
   }
   if (provider === 'keycloak' && isRecord(auth?.['keycloak'])) {
-    return { auth: auth as unknown as KeycloakAuthConfig };
+    return { auth: auth as unknown as KeycloakAuthConfig, features };
   }
   throw new Error(`Unsupported auth provider in ${RUNTIME_CONFIG_URL}: ${String(provider)}.`);
+}
+
+function parseFeatures(value: unknown): Features {
+  if (
+    isRecord(value) &&
+    typeof value['admin'] === 'boolean' &&
+    typeof value['signUpForm'] === 'boolean'
+  ) {
+    return { admin: value['admin'], signUpForm: value['signUpForm'] };
+  }
+  throw new Error(`Missing or invalid "features" in ${RUNTIME_CONFIG_URL}.`);
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>

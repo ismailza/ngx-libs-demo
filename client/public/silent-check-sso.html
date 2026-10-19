@@ -1,0 +1,10 @@
+<!doctype html>
+<html>
+  <body>
+    <script>
+      // Loaded by keycloak-js in a hidden iframe (silentCheckSsoRedirectUri): hands the
+      // redirect result back to the app.
+      parent.postMessage(location.href, location.origin);
+    </script>
+  </body>
+</html>
