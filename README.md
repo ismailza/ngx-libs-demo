@@ -5,14 +5,14 @@ real backend:
 
 | Library | Role in the app |
 | --- | --- |
-| [`@ismailza/ngx-auth-client`](https://github.com/ismailza/ngx-auth-client) | The session: sign-in, token refresh, `authGuard`, role checks, the bearer token. The adapter (`withHttpAuth()` today) follows the server's configuration. |
+| [`@ismailza/ngx-auth-client`](https://github.com/ismailza/ngx-auth-client) | The session: sign-in, token refresh, `authGuard`, role checks, the bearer token. The adapter — `withHttpAuth()` or `withKeycloak()` — follows the server's configuration. |
 | [`@ismailza/ngx-api-client`](https://github.com/ismailza/ngx-api-client) | Every other API call: versioned URLs, retry with backoff, `problem+json` errors as `ApiError`, success toasts, loading state. |
 
 | Folder | Stack |
 | --- | --- |
 | `server/` | ASP.NET Core 10 minimal API, ASP.NET Core Identity, EF Core, Postgres 18, xUnit v3 + Testcontainers |
 | `client/` | Angular 22 (zoneless, signals, Signal Forms), Vitest, ESLint |
-| root | `docker-compose.yml` (Postgres + API + nginx), CI, docs |
+| root | `docker-compose.yml` (Postgres + API + nginx, optional Keycloak 26.8 + its Postgres), `keycloak/` realm, CI, docs |
 
 ## Quick start
 
@@ -23,6 +23,10 @@ docker compose up --build
 
 Open <http://localhost:8080> and sign in as **alice** (role `user`) or **admin**
 (roles `user`, `admin`). Both use the password `Passw0rd!`.
+
+To use Keycloak instead of the API's own login, set `AUTH_PROVIDER=Keycloak` and
+`COMPOSE_PROFILES=keycloak` in `.env`, then run the same command. The same two
+accounts exist in the imported realm; see [docs/auth-providers.md](docs/auth-providers.md).
 
 To work on the code with hot reload, see [docs/development.md](docs/development.md).
 
@@ -38,7 +42,7 @@ retries, error normalisation, versioning and the open-redirect check. The
 | Document | Contents |
 | --- | --- |
 | [Architecture](docs/architecture.md) | How a request flows, the interceptor chain, project layout, design choices |
-| [Auth providers](docs/auth-providers.md) | How the server picks the provider and the client follows; the Keycloak plan |
+| [Auth providers](docs/auth-providers.md) | How the server picks the provider and the client follows; the Keycloak setup |
 | [Backend contract](docs/backend-contract.md) | Endpoints, tokens and cookie, error format, paging, versioning |
 | [Development](docs/development.md) | Running locally, tests, lint, migrations, configuration reference |
 | [Test scenarios](docs/test-scenarios.md) | Manual test plan for both libraries |

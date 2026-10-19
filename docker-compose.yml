@@ -24,7 +24,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__Default: Host=db;Port=5432;Database=demo;Username=demo;Password=${POSTGRES_PASSWORD:-demo};Gss Encryption Mode=Disable
-      # Local | Keycloak (not implemented yet) — see docs/auth-providers.md
+      # Local | Keycloak — see docs/auth-providers.md. Keycloak also needs COMPOSE_PROFILES=keycloak.
       Auth__Provider: ${AUTH_PROVIDER:-Local}
       Auth__Local__Jwt__SigningKey: ${JWT_SIGNING_KEY:?Set JWT_SIGNING_KEY in .env (at least 32 characters)}
       Auth__Local__Jwt__AccessTokenMinutes: ${ACCESS_TOKEN_MINUTES:-5}
@@ -33,8 +33,71 @@ services:
       # Off unless .env turns it on: creates alice and admin with a known password.
       Seed__Enabled: ${SEED_DEMO_USERS:-false}
       Seed__Password: ${SEED_PASSWORD:-Passw0rd!}
+      # Only read when Auth__Provider is Keycloak. The browser (and so the token's `iss`) uses
+      # the public URL; the API fetches signing keys over the Compose network.
+      Auth__Keycloak__Url: ${KEYCLOAK_URL:-http://localhost:8180}
+      Auth__Keycloak__InternalUrl: http://keycloak:8080
+      # Keys are fetched over the Compose network from http://keycloak:8080, never over the
+      # public URL, so this stays false even when KEYCLOAK_URL is https.
+      Auth__Keycloak__RequireHttpsMetadata: "false"
     depends_on:
       db:
+        condition: service_healthy
+      # Not required: with the Local provider the keycloak profile is off and this is skipped.
+      keycloak:
+        condition: service_healthy
+        required: false
+
+  # Keycloak's own database, separate from the API's: the two never share tables or credentials.
+  keycloak-db:
+    image: postgres:18-alpine
+    profiles: [keycloak]
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD:-keycloak}
+    volumes:
+      - keycloak-db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8
+    profiles: [keycloak]
+    # Dev mode: plain HTTP and relaxed caching, fine for a demo. The realm is imported once,
+    # on first start; later starts keep whatever was changed in the admin console.
+    command: start-dev --import-realm
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:-keycloak}
+      # Tokens always carry this issuer, whichever host asked for them. Back-channel URLs
+      # (keys, token endpoint) follow the request, so the API can use http://keycloak:8080.
+      KC_HOSTNAME: ${KEYCLOAK_URL:-http://localhost:8180}
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      KC_HEALTH_ENABLED: "true"
+      # Admin console user for the master realm, not a demo user.
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:-kcadmin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-kcadmin}
+      # Substituted into demo-realm.json on import: the app's address, for redirect URIs.
+      APP_URL: ${APP_URL:-http://localhost:8080}
+    ports:
+      - "8180:8080"
+    volumes:
+      - ./keycloak/demo-realm.json:/opt/keycloak/data/import/demo-realm.json:ro
+    healthcheck:
+      # The image has no curl; the management port serves /health/ready.
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000 && printf 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q '\"UP\"' <&3"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    depends_on:
+      keycloak-db:
         condition: service_healthy
 
   client:
@@ -46,3 +109,4 @@ services:
 
 volumes:
   db-data:
+  keycloak-db-data:

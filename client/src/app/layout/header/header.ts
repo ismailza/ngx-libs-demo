@@ -25,15 +25,18 @@ export class Header {
     return typeof name === 'string' ? name : '';
   });
 
-  /** The adapter's own sign-up (Keycloak), or else this app's form (Local). */
+  /** The adapter's own sign-up (Keycloak), or else this app's form when the API has one. */
   protected readonly signUp = computed<'adapter' | 'form' | null>(() => {
     if (this.auth.canRegister()) {
       return 'adapter';
     }
-    return this.runtime.auth.provider === 'local' ? 'form' : null;
+    return this.runtime.features.signUpForm ? 'form' : null;
   });
 
-  protected readonly isAdmin = computed(() => this.auth.roles().includes('admin'));
+  /** Only when the API serves the admin endpoints, and the user may call them. */
+  protected readonly showAdmin = computed(
+    () => this.runtime.features.admin && this.auth.roles().includes('admin'),
+  );
   protected readonly loggingOut = signal(false);
   protected readonly logoutError = signal<string | null>(null);
 

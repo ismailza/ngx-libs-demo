@@ -12,7 +12,7 @@ dotnet test                        # integration tests (needs Docker)
 
 | Path | Contents |
 | --- | --- |
-| `src/Demo.Api/Auth/` | Provider switch, `/api/config`, Local provider, Keycloak stub |
+| `src/Demo.Api/Auth/` | Provider switch, `/api/config`, Local provider, Keycloak token validation |
 | `src/Demo.Api/Data/` | EF Core context, entities, migrations, seeding |
 | `src/Demo.Api/Features/` | Notes, Admin, Playground endpoints |
 | `src/Demo.Api/Infrastructure/` | problem+json writer, rate limiting, paging |

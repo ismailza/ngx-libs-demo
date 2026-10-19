@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, CanMatchFn, Router } from '@angular/router';
 import { AuthService } from '@ismailza/ngx-auth-client';
-import { RUNTIME_CONFIG } from '../config/runtime-config';
+import { type Features, RUNTIME_CONFIG } from '../config/runtime-config';
 
 /** Keeps signed-in users away from the login and sign-up pages. */
 export const guestGuard: CanActivateFn = async () => {
@@ -17,5 +17,12 @@ export const guestGuard: CanActivateFn = async () => {
  */
 export const canSignInInApp: CanMatchFn = () => inject(AuthService).canSignIn();
 
-/** The sign-up form talks to the Local provider's own endpoint. */
-export const usesLocalProvider: CanMatchFn = () => inject(RUNTIME_CONFIG).auth.provider === 'local';
+/**
+ * Routes a page only when the API serves its endpoints (`features` in
+ * `/api/config`): the Admin page and the sign-up form exist with the Local
+ * provider only. Without a match, the URL falls through to the `**` redirect.
+ */
+export const featureEnabled =
+  (feature: keyof Features): CanMatchFn =>
+  () =>
+    inject(RUNTIME_CONFIG).features[feature];

@@ -34,5 +34,11 @@
       scoped to <code>/api/auth</code>: DevTools → Application → Cookies shows it, but scripts on
       this page can't read it.
     </p>
+  } @else if (provider === 'keycloak') {
+    <p class="hint">
+      <code>keycloak-js</code> keeps the tokens in memory and refreshes the access token with
+      Keycloak directly. On reload, the session comes back from Keycloak's SSO cookie through a
+      hidden iframe (<code>silent-check-sso.html</code>).
+    </p>
   }
 </aside>
